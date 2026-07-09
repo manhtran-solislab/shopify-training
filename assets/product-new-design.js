@@ -105,10 +105,8 @@ const initColorSwatches = (el) => {
   const colorNameEl = el.querySelector('.js-color-name')
   const variantIdEl = el.querySelector('.js-variant-id')
   const mainImageEl = el.querySelector('.js-main-image')
-  console.log(mainImageEl)
 
   if (!colorSwatches.length) return
-
   colorSwatches.forEach((colorSwatch) => {
     colorSwatch.addEventListener('click', () => {
       const imageSrc = colorSwatch.dataset.imageSrc
