@@ -1,0 +1,19 @@
+{
+  "name": "shopify-training",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tailwindcss -i ./src/tailwind.css -o ./assets/application.css --watch",
+    "build": "tailwindcss -i ./src/tailwind.css -o ./assets/application.css --minify"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "autoprefixer": "^10.5.2",
+    "postcss": "^8.5.16",
+    "tailwindcss": "^3.4.17"
+  }
+}
