@@ -14,7 +14,7 @@
 
 <style>
   .is-swatch-active {
-    border-color: white !important;
+    border-color: white;
   }
 
   .js-error-message.is-error-visible {
@@ -41,7 +41,7 @@
   style="background: linear-gradient(150deg, #7B2DD8 55%, #4A0082 100%);"
 >
   <div class="max-w-[1440px] mx-auto px-6 lg:px-16">
-    <div class="flex flex-col md:flex-row md:items-start gap-10 lg:gap-20">
+    <div class="flex flex-col md:flex-row md:items-start md:gap-20 lg:gap-36">
 
       {%- comment -%} ===== IMAGE GALLERY (LEFT) ===== {%- endcomment -%}
       {%- comment -%} Tìm media block để lấy shopify_attributes cho editor highlight {%- endcomment -%}
@@ -53,7 +53,7 @@
       {%- endfor -%}
 
       <div
-        class="w-full md:w-[58%]"
+        class="w-full md:w-[65%]"
         {% if media_block %}{{ media_block.shopify_attributes }}{% endif %}
       >
 
@@ -61,13 +61,13 @@
         <div class="hidden md:!block">
           {%- if product.images[0] -%}
             <div class="flex justify-center mb-6">
-              <figure class="w-[68%] max-w-[480px]">
+              <figure class="w-[68%] max-w-[600px]">
                 <img
                   class="js-main-image w-full object-contain drop-shadow-2xl"
                   src="{{ product.images[0] | image_url: width: 600 }}"
                   alt="{{ product.images[0].alt | escape }}"
-                  width="480"
-                  height="480"
+                  width="600"
+                  height="600"
                   loading="eager"
                 >
               </figure>
@@ -79,10 +79,10 @@
                 <figure class="w-[42%] max-w-[280px]">
                   <img
                     class="w-full object-contain drop-shadow-xl"
-                    src="{{ image | image_url: width: 280 }}"
+                    src="{{ image | image_url: width: 350 }}"
                     alt="{{ image.alt | escape }}"
-                    width="280"
-                    height="280"
+                    width="350"
+                    height="350"
                     loading="lazy"
                   >
                 </figure>
@@ -93,7 +93,7 @@
       </div>
 
       {%- comment -%} ===== PRODUCT INFO (RIGHT - blocks) ===== {%- endcomment -%}
-      <div class="w-full md:w-[42%] text-white">
+      <div class="w-full md:w-[35%] text-white">
         {%- for block in section.blocks -%}
           {%- case block.type -%}
 
@@ -181,8 +181,8 @@
               {%- endfor -%}
 
             {%- when 'add_to_cart' -%}
-              <div {{ block.shopify_attributes }}>
-                <form class="js-product-form mb-7">
+              <div class="mb-10" {{ block.shopify_attributes }}>
+                <form class="js-product-form">
                   <input
                     class="js-variant-id"
                     name="id"
@@ -201,11 +201,11 @@
                     {%- endif -%}
                   </button>
                 </form>
-                <div class="js-error-message hidden text-red-400 text-sm mb-3 rounded-lg bg-red-400/10 px-4 py-3"></div>
+                <div class="js-error-message hidden text-red-400 text-sm mt-4 rounded-lg bg-red-400/10 px-4 py-3"></div>
               </div>
 
             {%- when 'text' -%}
-              <p class="text-2xl text-white/70" {{ block.shopify_attributes }}>
+              <p class="mb-3 text-2xl text-white/70" {{ block.shopify_attributes }}>
                 {{ block.settings.text }}
               </p>  
 
