@@ -133,17 +133,17 @@
 
             {%- when 'title' -%}
               <div {{ block.shopify_attributes }}>
-                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold uppercase leading-tight tracking-wide mb-2">
+                <h1 class="text-4xl lg:text-5xl text-white font-bold uppercase leading-tight tracking-wide mb-2">
                   {{ product.title }}
                 </h1>
                 {%- if product.vendor != blank -%}
-                  <p class="text-base text-white/60 mb-3">{{ product.vendor }}</p>
+                  <p class="text-2xl text-white/60 mb-3">{{ product.vendor }}</p>
                 {%- endif -%}
               </div>
 
             {%- when 'price' -%}
               <div {{ block.shopify_attributes }}>
-                <p class="text-2xl font-semibold mb-6">
+                <p class="text-2xl lg:text-3xl font-semibold mb-6">
                   {{ current_variant.price | money }}
                 </p>
               </div>
@@ -155,7 +155,7 @@
                     class="mb-7"
                     {{ block.shopify_attributes }}
                   >
-                    <p class="text-base text-white/80 mb-3">
+                    <p class="text-2xl text-white/80 mb-3">
                       Color: <span class="js-color-name font-semibold">{{ current_variant.options[color_option_index] }}</span>
                     </p>
                     <div class="flex items-center gap-2 flex-wrap">
@@ -165,11 +165,11 @@
                         {%- unless seen_colors contains color_key -%}
                           {%- assign seen_colors = seen_colors | append: color_key -%}
                           {%- if swatch_index > 0 -%}
-                            <span class="text-white/40 text-base select-none leading-none">&middot;</span>
+                            <span class="text-white/40 text-2xl select-none leading-none">&middot;</span>
                           {%- endif -%}
                           {%- assign swatch_image = variant.featured_image | default: product.featured_image -%}
                           <button
-                            class="js-color-swatch relative rounded-full overflow-hidden w-12 h-12 border-2 transition-all duration-200 hover:border-white/70 {% if swatch_index == 0 %}is-swatch-active{% else %}border-transparent{% endif %}"
+                            class="js-color-swatch relative rounded-sm overflow-hidden w-24 h-24 p-2 border transition-all duration-200 hover:border-white/70 {% if swatch_index == 0 %}is-swatch-active{% else %}border-transparent{% endif %}"
                             data-color-name="{{ color | escape }}"
                             data-variant-id="{{ variant.id }}"
                             data-image-src="{{ swatch_image | image_url: width: 600 }}"
@@ -203,29 +203,24 @@
                     value="{{ current_variant.id }}"
                   >
                   <button
-                    class="js-add-to-cart w-full py-4 px-8 rounded-full bg-black text-white font-semibold text-base border-2 border-[#FF1DB4] shadow-[0_0_16px_rgba(255,29,180,0.7)] hover:shadow-[0_0_28px_rgba(255,29,180,0.9)] transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                    class="js-add-to-cart w-full py-4 px-8 rounded-full bg-black text-white font-semibold text-2xl border-2 border-[#FF1DB4] shadow-[0_0_16px_rgba(255,29,180,0.7)] hover:shadow-[0_0_28px_rgba(255,29,180,0.9)] transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
                     type="submit"
                     {% unless current_variant.available %}disabled{% endunless %}
                   >
                     {%- if current_variant.available -%}
-                      Add to Cart
+                      {{ block.settings.add_to_cart_label | default: 'Add to Cart' }}
                     {%- else -%}
-                      Sold Out
+                      {{ block.settings.sold_out_label | default: 'Sold Out' }}
                     {%- endif -%}
                   </button>
                 </form>
                 <div class="js-error-message hidden text-red-400 text-sm mb-3 rounded-lg bg-red-400/10 px-4 py-3"></div>
               </div>
 
-            {%- when 'social_proof' -%}
-              <div {{ block.shopify_attributes }}>
-                <p class="text-sm text-white/60 italic mb-5">8 people have this in their cart</p>
-              </div>
-
             {%- when 'description' -%}
               {%- if product.description != blank -%}
                 <div
-                  class="text-base text-white/80 leading-relaxed rte"
+                  class="text-2xl text-white/80 leading-relaxed rte"
                   {{ block.shopify_attributes }}
                 >
                   {{ product.description }}
@@ -279,13 +274,20 @@
       "type": "add_to_cart",
       "name": "Add to Cart",
       "limit": 1,
-      "settings": []
-    },
-    {
-      "type": "social_proof",
-      "name": "Social Proof",
-      "limit": 1,
-      "settings": []
+      "settings": [
+        {
+          "type": "text",
+          "id": "add_to_cart_label",
+          "label": "Add to Cart Label",
+          "default": "Add to Cart"
+        },
+        {
+          "type": "text",
+          "id": "sold_out_label",
+          "label": "Sold Out Label",
+          "default": "Sold Out"
+        }
+      ]
     },
     {
       "type": "description",
@@ -303,7 +305,6 @@
         { "type": "price" },
         { "type": "color_swatches" },
         { "type": "add_to_cart" },
-        { "type": "social_proof" },
         { "type": "description" }
       ]
     }
