@@ -29,20 +29,10 @@
 
   .product-main-new__swiper .swiper-pagination {
     bottom: 0;
+    top: unset;
   }
-
-  .product-main-new__swiper .swiper-pagination-bullet {
-    width: 6px;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.4);
-    opacity: 1;
-    transition: all 0.2s;
-  }
-
-  .product-main-new__swiper .swiper-pagination-bullet-active {
-    background: white;
-    width: 8px;
-    height: 8px;
+  .product-main-new__swiper .swiper-pagination .swiper-pagination-progressbar-fill {
+    background: rgba(255, 255, 255, 1);
   }
 </style>
 
@@ -100,30 +90,6 @@
             {%- endfor -%}
           </div>
         </div>
-
-        {%- comment -%} Mobile: Swiper {%- endcomment -%}
-        <div class="block md:hidden">
-          <div class="js-product-swiper product-main-new__swiper swiper overflow-hidden pb-10">
-            <div class="swiper-wrapper items-center">
-              {%- for image in product.images -%}
-                <div class="swiper-slide">
-                  <figure>
-                    <img
-                      class="w-full object-contain drop-shadow-2xl"
-                      src="{{ image | image_url: width: 600 }}"
-                      alt="{{ image.alt | escape }}"
-                      width="600"
-                      height="600"
-                      loading="{%- if forloop.first -%}eager{%- else -%}lazy{%- endif -%}"
-                    >
-                  </figure>
-                </div>
-              {%- endfor -%}
-            </div>
-            <div class="swiper-pagination"></div>
-          </div>
-        </div>
-
       </div>
 
       {%- comment -%} ===== PRODUCT INFO (RIGHT - blocks) ===== {%- endcomment -%}
@@ -137,7 +103,7 @@
                   {{ product.title }}
                 </h1>
                 {%- if product.vendor != blank -%}
-                  <p class="text-2xl text-white/60 mb-3">{{ product.vendor }}</p>
+                  <p class="text-2xl text-white/70 mb-3">{{ product.vendor }}</p>
                 {%- endif -%}
               </div>
 
@@ -147,16 +113,37 @@
                   {{ current_variant.price | money }}
                 </p>
               </div>
+            {%- when 'media' -%}  
+              {%- comment -%} Mobile: Swiper {%- endcomment -%}
+              <div class="block md:hidden pb-10" {{ block.shopify_attributes }}>
+                <div class="js-product-swiper product-main-new__swiper swiper overflow-hidden">
+                  <div class="swiper-wrapper items-center pb-8">
+                    {%- for image in product.images -%}
+                      <div class="swiper-slide">
+                        <figure>
+                          <img
+                            class="w-full object-contain drop-shadow-2xl"
+                            src="{{ image | image_url: width: 600 }}"
+                            alt="{{ image.alt | escape }}"
+                            width="600"
+                            height="600"
+                            loading="{%- if forloop.first -%}eager{%- else -%}lazy{%- endif -%}"
+                          >
+                        </figure>
+                      </div>
+                    {%- endfor -%}
+                  </div>
+                  <div class="swiper-pagination"></div>
+                </div>
+              </div>
 
             {%- when 'color_swatches' -%}
               {%- for option in product.options -%}
                 {%- if option == 'Color' -%}
                   <div
-                    class="mb-7"
-                    {{ block.shopify_attributes }}
-                  >
-                    <p class="text-2xl text-white/80 mb-3">
-                      Color: <span class="js-color-name font-semibold">{{ current_variant.options[color_option_index] }}</span>
+                    class="mb-7" {{ block.shopify_attributes }}>
+                    <p class="text-2xl text-white mb-3">
+                      Color: <span class="js-color-name">{{ current_variant.options[color_option_index] }}</span>
                     </p>
                     <div class="flex items-center gap-2 flex-wrap">
                       {%- for variant in product.variants -%}
@@ -169,7 +156,7 @@
                           {%- endif -%}
                           {%- assign swatch_image = variant.featured_image | default: product.featured_image -%}
                           <button
-                            class="js-color-swatch relative rounded-sm overflow-hidden w-24 h-24 p-2 border transition-all duration-200 hover:border-white/70 {% if swatch_index == 0 %}is-swatch-active{% else %}border-transparent{% endif %}"
+                            class="js-color-swatch relative rounded-sm overflow-hidden w-24 h-24 p-2 border transition-all duration-200 hover:border-white/70 border-transparent {% if swatch_index == 0 %}is-swatch-active{% endif %}"
                             data-color-name="{{ color | escape }}"
                             data-variant-id="{{ variant.id }}"
                             data-image-src="{{ swatch_image | image_url: width: 600 }}"
@@ -195,7 +182,7 @@
 
             {%- when 'add_to_cart' -%}
               <div {{ block.shopify_attributes }}>
-                <form class="js-product-form mb-3">
+                <form class="js-product-form mb-7">
                   <input
                     class="js-variant-id"
                     name="id"
@@ -203,7 +190,7 @@
                     value="{{ current_variant.id }}"
                   >
                   <button
-                    class="js-add-to-cart w-full py-4 px-8 rounded-full bg-black text-white font-semibold text-2xl border-2 border-[#FF1DB4] shadow-[0_0_16px_rgba(255,29,180,0.7)] hover:shadow-[0_0_28px_rgba(255,29,180,0.9)] transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                    class="js-add-to-cart w-full py-6 px-8 rounded-full bg-black text-white font-semibold text-2xl shadow-[2px_2px_0px_4px_#FF1DB3] disabled:opacity-60 disabled:cursor-not-allowed"
                     type="submit"
                     {% unless current_variant.available %}disabled{% endunless %}
                   >
@@ -217,12 +204,15 @@
                 <div class="js-error-message hidden text-red-400 text-sm mb-3 rounded-lg bg-red-400/10 px-4 py-3"></div>
               </div>
 
+            {%- when 'text' -%}
+              <p class="text-2xl text-white/70" {{ block.shopify_attributes }}>
+                {{ block.settings.text }}
+              </p>  
+
             {%- when 'description' -%}
               {%- if product.description != blank -%}
                 <div
-                  class="text-2xl text-white/80 leading-relaxed rte"
-                  {{ block.shopify_attributes }}
-                >
+                  class="text-2xl text-white leading-relaxed rte" {{ block.shopify_attributes }}>
                   {{ product.description }}
                 </div>
               {%- endif -%}
@@ -290,6 +280,19 @@
       ]
     },
     {
+      "type": "text",
+      "name": "Text",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "8 people have this in their cart"
+        }
+      ]
+    },
+    {
       "type": "description",
       "name": "Description",
       "limit": 1,
@@ -300,11 +303,13 @@
     {
       "name": "Product Main New",
       "blocks": [
-        { "type": "media" },
+        
         { "type": "title" },
         { "type": "price" },
+        { "type": "media" },
         { "type": "color_swatches" },
         { "type": "add_to_cart" },
+        { "type": "text" },
         { "type": "description" }
       ]
     }
