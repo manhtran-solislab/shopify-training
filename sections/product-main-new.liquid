@@ -1,0 +1,312 @@
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign color_option_index = 0
+  for option in product.options
+    if option == 'Color'
+      assign color_option_index = forloop.index0
+    endif
+  endfor
+  assign seen_colors = ''
+  assign swatch_index = 0
+-%}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+
+<style>
+  .is-swatch-active {
+    border-color: white !important;
+  }
+
+  .js-error-message.is-error-visible {
+    display: block;
+  }
+
+  .js-add-to-cart.is-btn-loading {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .product-main-new__swiper .swiper-pagination {
+    bottom: 0;
+  }
+
+  .product-main-new__swiper .swiper-pagination-bullet {
+    width: 6px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.4);
+    opacity: 1;
+    transition: all 0.2s;
+  }
+
+  .product-main-new__swiper .swiper-pagination-bullet-active {
+    background: white;
+    width: 8px;
+    height: 8px;
+  }
+</style>
+
+<section
+  class="js-product-main-new relative overflow-hidden py-10 md:py-16"
+  style="background: linear-gradient(150deg, #7B2DD8 55%, #4A0082 100%);"
+>
+  <div class="max-w-[1440px] mx-auto px-6 lg:px-16">
+    <div class="flex flex-col md:flex-row md:items-start gap-10 lg:gap-20">
+
+      {%- comment -%} ===== IMAGE GALLERY (LEFT) ===== {%- endcomment -%}
+      {%- comment -%} Tìm media block để lấy shopify_attributes cho editor highlight {%- endcomment -%}
+      {%- assign media_block = nil -%}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'media' -%}
+          {%- assign media_block = block -%}
+        {%- endif -%}
+      {%- endfor -%}
+
+      <div
+        class="w-full md:w-[58%]"
+        {% if media_block %}{{ media_block.shopify_attributes }}{% endif %}
+      >
+
+        {%- comment -%} Desktop: Collage {%- endcomment -%}
+        <div class="hidden md:!block">
+          {%- if product.images[0] -%}
+            <div class="flex justify-center mb-6">
+              <figure class="w-[68%] max-w-[480px]">
+                <img
+                  class="js-main-image w-full object-contain drop-shadow-2xl"
+                  src="{{ product.images[0] | image_url: width: 600 }}"
+                  alt="{{ product.images[0].alt | escape }}"
+                  width="480"
+                  height="480"
+                  loading="eager"
+                >
+              </figure>
+            </div>
+          {%- endif -%}
+          <div class="flex flex-wrap justify-around items-end gap-6 px-6">
+            {%- for image in product.images -%}
+              {%- unless forloop.first -%}
+                <figure class="w-[42%] max-w-[280px]">
+                  <img
+                    class="w-full object-contain drop-shadow-xl"
+                    src="{{ image | image_url: width: 280 }}"
+                    alt="{{ image.alt | escape }}"
+                    width="280"
+                    height="280"
+                    loading="lazy"
+                  >
+                </figure>
+              {%- endunless -%}
+            {%- endfor -%}
+          </div>
+        </div>
+
+        {%- comment -%} Mobile: Swiper {%- endcomment -%}
+        <div class="block md:hidden">
+          <div class="js-product-swiper product-main-new__swiper swiper overflow-hidden pb-10">
+            <div class="swiper-wrapper items-center">
+              {%- for image in product.images -%}
+                <div class="swiper-slide">
+                  <figure>
+                    <img
+                      class="w-full object-contain drop-shadow-2xl"
+                      src="{{ image | image_url: width: 600 }}"
+                      alt="{{ image.alt | escape }}"
+                      width="600"
+                      height="600"
+                      loading="{%- if forloop.first -%}eager{%- else -%}lazy{%- endif -%}"
+                    >
+                  </figure>
+                </div>
+              {%- endfor -%}
+            </div>
+            <div class="swiper-pagination"></div>
+          </div>
+        </div>
+
+      </div>
+
+      {%- comment -%} ===== PRODUCT INFO (RIGHT - blocks) ===== {%- endcomment -%}
+      <div class="w-full md:w-[42%] text-white">
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+
+            {%- when 'title' -%}
+              <div {{ block.shopify_attributes }}>
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold uppercase leading-tight tracking-wide mb-2">
+                  {{ product.title }}
+                </h1>
+                {%- if product.vendor != blank -%}
+                  <p class="text-base text-white/60 mb-3">{{ product.vendor }}</p>
+                {%- endif -%}
+              </div>
+
+            {%- when 'price' -%}
+              <div {{ block.shopify_attributes }}>
+                <p class="text-2xl font-semibold mb-6">
+                  {{ current_variant.price | money }}
+                </p>
+              </div>
+
+            {%- when 'color_swatches' -%}
+              {%- for option in product.options -%}
+                {%- if option == 'Color' -%}
+                  <div
+                    class="mb-7"
+                    {{ block.shopify_attributes }}
+                  >
+                    <p class="text-base text-white/80 mb-3">
+                      Color: <span class="js-color-name font-semibold">{{ current_variant.options[color_option_index] }}</span>
+                    </p>
+                    <div class="flex items-center gap-2 flex-wrap">
+                      {%- for variant in product.variants -%}
+                        {%- assign color = variant.options[color_option_index] -%}
+                        {%- assign color_key = '|' | append: color | append: '|' -%}
+                        {%- unless seen_colors contains color_key -%}
+                          {%- assign seen_colors = seen_colors | append: color_key -%}
+                          {%- if swatch_index > 0 -%}
+                            <span class="text-white/40 text-base select-none leading-none">&middot;</span>
+                          {%- endif -%}
+                          {%- assign swatch_image = variant.featured_image | default: product.featured_image -%}
+                          <button
+                            class="js-color-swatch relative rounded-full overflow-hidden w-12 h-12 border-2 transition-all duration-200 hover:border-white/70 {% if swatch_index == 0 %}is-swatch-active{% else %}border-transparent{% endif %}"
+                            data-color-name="{{ color | escape }}"
+                            data-variant-id="{{ variant.id }}"
+                            data-image-src="{{ swatch_image | image_url: width: 600 }}"
+                            type="button"
+                            aria-label="Color: {{ color | escape }}"
+                          >
+                            <img
+                              class="w-full h-full object-cover"
+                              src="{{ swatch_image | image_url: width: 96 }}"
+                              alt="{{ color | escape }}"
+                              width="48"
+                              height="48"
+                              loading="lazy"
+                            >
+                          </button>
+                          {%- assign swatch_index = swatch_index | plus: 1 -%}
+                        {%- endunless -%}
+                      {%- endfor -%}
+                    </div>
+                  </div>
+                {%- endif -%}
+              {%- endfor -%}
+
+            {%- when 'add_to_cart' -%}
+              <div {{ block.shopify_attributes }}>
+                <form class="js-product-form mb-3">
+                  <input
+                    class="js-variant-id"
+                    name="id"
+                    type="hidden"
+                    value="{{ current_variant.id }}"
+                  >
+                  <button
+                    class="js-add-to-cart w-full py-4 px-8 rounded-full bg-black text-white font-semibold text-base border-2 border-[#FF1DB4] shadow-[0_0_16px_rgba(255,29,180,0.7)] hover:shadow-[0_0_28px_rgba(255,29,180,0.9)] transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                    type="submit"
+                    {% unless current_variant.available %}disabled{% endunless %}
+                  >
+                    {%- if current_variant.available -%}
+                      Add to Cart
+                    {%- else -%}
+                      Sold Out
+                    {%- endif -%}
+                  </button>
+                </form>
+                <div class="js-error-message hidden text-red-400 text-sm mb-3 rounded-lg bg-red-400/10 px-4 py-3"></div>
+              </div>
+
+            {%- when 'social_proof' -%}
+              <div {{ block.shopify_attributes }}>
+                <p class="text-sm text-white/60 italic mb-5">8 people have this in their cart</p>
+              </div>
+
+            {%- when 'description' -%}
+              {%- if product.description != blank -%}
+                <div
+                  class="text-base text-white/80 leading-relaxed rte"
+                  {{ block.shopify_attributes }}
+                >
+                  {{ product.description }}
+                </div>
+              {%- endif -%}
+
+          {%- endcase -%}
+        {%- endfor -%}
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer="defer"></script>
+<script src="{{ 'product-new-design.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "Product Main New",
+  "tag": "section",
+  "class": "section-product-main-new",
+  "limit": 1,
+  "settings": [],
+  "blocks": [
+    {
+      "type": "media",
+      "name": "Media",
+      "limit": 1,
+      "settings": []
+    },
+    {
+      "type": "title",
+      "name": "Title",
+      "limit": 1,
+      "settings": []
+    },
+    {
+      "type": "price",
+      "name": "Price",
+      "limit": 1,
+      "settings": []
+    },
+    {
+      "type": "color_swatches",
+      "name": "Color Swatches",
+      "limit": 1,
+      "settings": []
+    },
+    {
+      "type": "add_to_cart",
+      "name": "Add to Cart",
+      "limit": 1,
+      "settings": []
+    },
+    {
+      "type": "social_proof",
+      "name": "Social Proof",
+      "limit": 1,
+      "settings": []
+    },
+    {
+      "type": "description",
+      "name": "Description",
+      "limit": 1,
+      "settings": []
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Main New",
+      "blocks": [
+        { "type": "media" },
+        { "type": "title" },
+        { "type": "price" },
+        { "type": "color_swatches" },
+        { "type": "add_to_cart" },
+        { "type": "social_proof" },
+        { "type": "description" }
+      ]
+    }
+  ]
+}
+{% endschema %}
